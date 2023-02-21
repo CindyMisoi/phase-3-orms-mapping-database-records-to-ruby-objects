@@ -49,4 +49,34 @@ class Song
     song.save
   end
 
+  # converting database records to class instances
+  # create the Ruby object
+  # this reads data temporarily from sql and represents it in ruby
+  def self.new_from_db(row)
+    self.new(id:row[0],name:row[1],album:row[2])
+  end
+  # return all data from database
+  def self.all
+    sql = <<-SQL
+    SELECT*
+    FROM songs
+    SQL
+    # iterate over the rows
+    DB[:conn].execute(sql).map do |row|
+      self.new_from_db(row)
+    end
+  end
+  # find song by name
+  def self.find_by_name(name)
+    sql = <<-SQL
+      SELECT *
+      FROM songs
+      WHERE name = ?
+      LIMIT 1
+    SQL
+
+    DB[:conn].execute(sql, name).map do |row|
+      self.new_from_db(row)
+    end.first
+  end
 end
